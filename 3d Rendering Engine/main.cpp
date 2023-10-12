@@ -11,14 +11,8 @@ const int SCREEN_HEIGHT = 480;
 //Starts up SDL and creates window
 bool init();
 
-//Loads media
-bool loadMedia();
-
 //Frees media and shuts down SDL
 void close();
-
-//Loads individual image as texture
-SDL_Texture* loadTexture(std::string path);
 
 //The window we'll be rendering to
 SDL_Window* window = NULL;
@@ -33,6 +27,7 @@ using namespace std;
 
 struct
 {
+public:
 	float x = 0;
 	float y = 0;
 	float z = 0;
@@ -47,23 +42,23 @@ struct
 		const Uint8* currentKeyStates = SDL_GetKeyboardState(NULL);
 
 		if (currentKeyStates[SDL_SCANCODE_W])
-			zDirection = -1;
-		else if (currentKeyStates[SDL_SCANCODE_S])
 			zDirection = 1;
+		else if (currentKeyStates[SDL_SCANCODE_S])
+			zDirection = -1;
 		else
 			zDirection = 0;
 
-		if (currentKeyStates[SDL_SCANCODE_A])
+		if (currentKeyStates[SDL_SCANCODE_D])
 			xDirection = 1;
-		else if (currentKeyStates[SDL_SCANCODE_D])
+		else if (currentKeyStates[SDL_SCANCODE_A])
 			xDirection = -1;
 		else 
 			xDirection = 0;
 
 		if (currentKeyStates[SDL_SCANCODE_E])
-			yDirection = 1;
-		else if (currentKeyStates[SDL_SCANCODE_Q])
 			yDirection = -1;
+		else if (currentKeyStates[SDL_SCANCODE_Q])
+			yDirection = 1;
 		else
 			yDirection = 0;
 
@@ -71,7 +66,7 @@ struct
 		{ 
 			x = 0;
 			y = 0;
-			z = 0;
+			z = -10;
 			xDirection = 0;
 			yDirection = 0;
 			zDirection = 0;
@@ -97,8 +92,10 @@ public:
 
 		if (xOry == "x")
 			return x;
-		if (xOry == "y")
+		else if (xOry == "y")
 			return y;
+		else
+			return 0;
 	}
 
 	void draw(SDL_Renderer* renderer, float x1, float y1, float z1, float x2, float y2, float z2)
@@ -160,6 +157,8 @@ public:
 		//top inner lines
 		SDL_RenderDrawLine(renderer, scr_x2, scr_y2, scr_x6, scr_y6);
 		SDL_RenderDrawLine(renderer, scr_x4, scr_y4, scr_x8, scr_y8);
+
+		cout << scr_x1 << endl;
 
 	}
 private:
@@ -246,23 +245,33 @@ int main(int argc, char* args[])
 		bool quit = false;
 
 
-
+		Uint64 NOW = SDL_GetPerformanceCounter();
+		Uint64 LAST = 0;
+		double deltaTime = 0;
 
 		//While application is running
 		while (!quit)
 		{
+			LAST = NOW;
+			NOW = SDL_GetPerformanceCounter();
+
+			deltaTime = (double)((NOW - LAST) * 1000 / (double)SDL_GetPerformanceFrequency());
+
 			//Clear screen
 			SDL_SetRenderDrawColor(renderer, 230, 230, 230, 0);
 			SDL_RenderClear(renderer);
 
-			cam.updateLocation();
 			rectangular_prism.draw(renderer, 1, 1, 1, -1, -1, -1);
+			//rectangular_prism.draw(renderer, 6, 1, 1, 2, -1, -1);
+			//rectangular_prism.draw(renderer, 6, 5, 1, 2, 2, -1);
+			//rectangular_prism.draw(renderer, 1, 3, 1, 0, 2, 0);
+			cam.updateLocation();
 
 			//Update screen
 			SDL_RenderPresent(renderer);
 
 			//Handle events on queue
-			while (SDL_PollEvent(&e) != 0)
+			while (SDL_PollEvent(&e))
 			{
 				if (e.type == SDL_KEYDOWN || e.type == SDL_KEYUP)
 					cam.getinput();
