@@ -31,36 +31,76 @@ SDL_Event e;
 
 using namespace std;
 
-struct 
+struct
 {
-	float x, y, z = 0;
-	float xLook, yLook = 0;
-	void update()
+	float x = 0;
+	float y = 0;
+	float z = 0;
+	float xLook = 0;
+	float yLook = 0;
+	float speed = 0.001;
+	int xDirection = 0;
+	int yDirection = 0;
+	int zDirection = 0;
+	void getinput()
 	{
-		if (e.key.keysym.sym == SDLK_w)
-			cam.z -= 0.1;
-		if (e.key.keysym.sym == SDLK_a)
-			cam.x += 0.1;
-		if (e.key.keysym.sym == SDLK_s)
-			cam.z += 0.1;
-		if (e.key.keysym.sym == SDLK_d)
-			cam.x -= 0.1;
-		if (e.key.keysym.sym == SDLK_e)
-			cam.y += 0.1;
-		if (e.key.keysym.sym == SDLK_q)
-			cam.y -= 0.1;
-		if (e.key.keysym.sym == SDLK_r)
+		const Uint8* currentKeyStates = SDL_GetKeyboardState(NULL);
+
+		if (currentKeyStates[SDL_SCANCODE_W])
+			zDirection = -1;
+		else if (currentKeyStates[SDL_SCANCODE_S])
+			zDirection = 1;
+		else
+			zDirection = 0;
+
+		if (currentKeyStates[SDL_SCANCODE_A])
+			xDirection = 1;
+		else if (currentKeyStates[SDL_SCANCODE_D])
+			xDirection = -1;
+		else 
+			xDirection = 0;
+
+		if (currentKeyStates[SDL_SCANCODE_E])
+			yDirection = 1;
+		else if (currentKeyStates[SDL_SCANCODE_Q])
+			yDirection = -1;
+		else
+			yDirection = 0;
+
+		if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_r)
 		{ 
-			cam.x = 0;
-			cam.y = 0;
-			cam.z = 0;
+			x = 0;
+			y = 0;
+			z = 0;
+			xDirection = 0;
+			yDirection = 0;
+			zDirection = 0;
 		}
+	}
+	void updateLocation()
+	{
+		x += speed * xDirection;
+		y += speed * yDirection;
+		z += speed * zDirection;
 	}
 } cam;
 
 struct
 {
 public:
+	float get3dPoint(float x, float y, float z, string xOry)
+	{
+		float depth = 500/z;
+
+		x = x * depth + SCREEN_WIDTH / 2;
+		y = y * depth + SCREEN_HEIGHT / 2;
+
+		if (xOry == "x")
+			return x;
+		if (xOry == "y")
+			return y;
+	}
+
 	void draw(SDL_Renderer* renderer, float x1, float y1, float z1, float x2, float y2, float z2)
 	{
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
@@ -72,77 +112,54 @@ public:
 		z1 += cam.z;
 		z2 += cam.z;
 
-		float depth1 = 100 / (z1);
+		float scr_x1 = get3dPoint(x1, y1, z1, "x");
+		float scr_y1 = get3dPoint(x1, y1, z1, "y");
 
-		float depth2 = 100 / (z2+2.5);
+		float scr_x2 = get3dPoint(x1, y2, z1, "x");
+		float scr_y2 = get3dPoint(x1, y2, z1, "y");
 
-		int scr_x1 = x1 * depth1 + SCREEN_WIDTH / 2;
-		int scr_y1 = y1 * depth1 + SCREEN_HEIGHT / 2;
+		float scr_x3 = get3dPoint(x2, y1, z1, "x");
+		float scr_y3 = get3dPoint(x2, y1, z1, "y");
 
-		int scr_x2 = x1 * depth1 + SCREEN_WIDTH / 2;
-		int scr_y2 = y2 * depth1 + SCREEN_HEIGHT / 2;
-
-		int scr_x3 = x2 * depth1 + SCREEN_WIDTH / 2;
-		int scr_y3 = y1 * depth1 + SCREEN_HEIGHT / 2;
-
-		int scr_x4 = x2 * depth1 + SCREEN_WIDTH / 2;
-		int scr_y4 = y2 * depth1 + SCREEN_HEIGHT / 2;
+		float scr_x4 = get3dPoint(x2, y2, z1, "x");
+		float scr_y4 = get3dPoint(x2, y2, z1, "y");
 
 
+		float scr_x5 = get3dPoint(x1, y1, z2, "x");
+		float scr_y5 = get3dPoint(x1, y1, z2, "y");
 
-		int scr_x5 = x1 * depth2 + SCREEN_WIDTH / 2;
-		int scr_y5 = y1 * depth2 + SCREEN_HEIGHT / 2;
+		float scr_x6 = get3dPoint(x1, y2, z2, "x");
+		float scr_y6 = get3dPoint(x1, y2, z2, "y");
 
-		int scr_x6 = x1 * depth2 + SCREEN_WIDTH / 2;
-		int scr_y6 = y2 * depth2 + SCREEN_HEIGHT / 2;
+		float scr_x7 = get3dPoint(x2, y1, z2, "x");
+		float scr_y7 = get3dPoint(x2, y1, z2, "y");
 
-		int scr_x7 = x2 * depth2 + SCREEN_WIDTH / 2;
-		int scr_y7 = y1 * depth2 + SCREEN_HEIGHT / 2;
-
-		int scr_x8 = x2 * depth2 + SCREEN_WIDTH / 2;
-		int scr_y8 = y2 * depth2 + SCREEN_HEIGHT / 2;
+		float scr_x8 = get3dPoint(x2, y2, z2, "x");
+		float scr_y8 = get3dPoint(x2, y2, z2, "y");
 		
 		//left and right front lines
-		if (cam.z <= (z1 + cam.z))
-		{
-			SDL_RenderDrawLine(renderer, scr_x1, scr_y1, scr_x2, scr_y2);
-			SDL_RenderDrawLine(renderer, scr_x3, scr_y3, scr_x4, scr_y4);
-		}
+		SDL_RenderDrawLine(renderer, scr_x1, scr_y1, scr_x2, scr_y2);
+		SDL_RenderDrawLine(renderer, scr_x3, scr_y3, scr_x4, scr_y4);
 
 		//top and bottom front lines
-		if (cam.z <= (z1 + cam.z))
-		{
-			SDL_RenderDrawLine(renderer, scr_x1, scr_y1, scr_x3, scr_y3);
-			SDL_RenderDrawLine(renderer, scr_x2, scr_y2, scr_x4, scr_y4);
-		}
+		SDL_RenderDrawLine(renderer, scr_x1, scr_y1, scr_x3, scr_y3);
+		SDL_RenderDrawLine(renderer, scr_x2, scr_y2, scr_x4, scr_y4);
 
 		//left and right back lines
- 		if (cam.z >= (z2 + abs(cam.z) - 1))
-		{
-			SDL_RenderDrawLine(renderer, scr_x5, scr_y5, scr_x6, scr_y6);
-			SDL_RenderDrawLine(renderer, scr_x7, scr_y7, scr_x8, scr_y8);
-		}
+		SDL_RenderDrawLine(renderer, scr_x5, scr_y5, scr_x6, scr_y6);
+		SDL_RenderDrawLine(renderer, scr_x7, scr_y7, scr_x8, scr_y8);
 
 		//top and bottom back lines
-		if (cam.z >= (z2 + abs(cam.z) - 1))
-		{
-			SDL_RenderDrawLine(renderer, scr_x5, scr_y5, scr_x7, scr_y7);
-			SDL_RenderDrawLine(renderer, scr_x6, scr_y6, scr_x8, scr_y8);
-		}
+		SDL_RenderDrawLine(renderer, scr_x5, scr_y5, scr_x7, scr_y7);
+		SDL_RenderDrawLine(renderer, scr_x6, scr_y6, scr_x8, scr_y8);
 
 		//bottom inner lines
-		if (cam.z <= (z1 + cam.z) && cam.z >= (z2 + abs(cam.z) - 1))
-		{
-			SDL_RenderDrawLine(renderer, scr_x1, scr_y1, scr_x5, scr_y5);
-			SDL_RenderDrawLine(renderer, scr_x3, scr_y3, scr_x7, scr_y7);
-		}
+		SDL_RenderDrawLine(renderer, scr_x1, scr_y1, scr_x5, scr_y5);
+		SDL_RenderDrawLine(renderer, scr_x3, scr_y3, scr_x7, scr_y7);
 
 		//top inner lines
-		if (cam.z <= (z1 + cam.z) && cam.z >= (z2 + abs(cam.z) - 1))
-		{
-			SDL_RenderDrawLine(renderer, scr_x2, scr_y2, scr_x6, scr_y6);
-			SDL_RenderDrawLine(renderer, scr_x4, scr_y4, scr_x8, scr_y8);
-		}
+		SDL_RenderDrawLine(renderer, scr_x2, scr_y2, scr_x6, scr_y6);
+		SDL_RenderDrawLine(renderer, scr_x4, scr_y4, scr_x8, scr_y8);
 
 	}
 private:
@@ -216,33 +233,6 @@ void close()
 	SDL_Quit();
 }
 
-SDL_Texture* loadTexture(std::string path)
-{
-	//The final texture
-	SDL_Texture* newTexture = NULL;
-
-	//Load image at specified path
-	SDL_Surface* loadedSurface = IMG_Load(path.c_str());
-	if (loadedSurface == NULL)
-	{
-		printf("Unable to load image %s! SDL_image Error: %s\n", path.c_str(), IMG_GetError());
-	}
-	else
-	{
-		//Create texture from surface pixels
-		newTexture = SDL_CreateTextureFromSurface(renderer, loadedSurface);
-		if (newTexture == NULL)
-		{
-			printf("Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError());
-		}
-
-		//Get rid of old loaded surface
-		SDL_FreeSurface(loadedSurface);
-	}
-
-	return newTexture;
-}
-
 int main(int argc, char* args[])
 {
 	//Start up SDL and create window
@@ -265,6 +255,7 @@ int main(int argc, char* args[])
 			SDL_SetRenderDrawColor(renderer, 230, 230, 230, 0);
 			SDL_RenderClear(renderer);
 
+			cam.updateLocation();
 			rectangular_prism.draw(renderer, 1, 1, 1, -1, -1, -1);
 
 			//Update screen
@@ -273,8 +264,8 @@ int main(int argc, char* args[])
 			//Handle events on queue
 			while (SDL_PollEvent(&e) != 0)
 			{
-				if (e.type == SDL_KEYDOWN)
-					cam.update();
+				if (e.type == SDL_KEYDOWN || e.type == SDL_KEYUP)
+					cam.getinput();
 
 				//User requests quit
 				if (e.type == SDL_QUIT)
