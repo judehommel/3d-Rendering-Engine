@@ -37,37 +37,37 @@ public:
 	float yLook = 0;
 	float zLook = 0;
 	float speed = 0.007;
-	float sensitivity = 0.001;
+	float sensitivity = 0.002;
 	int xLookDir = 0;
 	int yLookDir = 0;
 	int zLookDir = 0;
-	int xDirection = 0;
-	int yDirection = 0;
-	int zDirection = 0;
+	int horizontalDirection = 0;
+	int verticalDirection = 0;
+	int forwardDirection = 0;
 	void getinput()
 	{
 		const Uint8* currentKeyStates = SDL_GetKeyboardState(NULL);
 
 		if (currentKeyStates[SDL_SCANCODE_W])
-			zDirection = -1;
+			forwardDirection = -1;
 		else if (currentKeyStates[SDL_SCANCODE_S])
-			zDirection = 1;
+			forwardDirection = 1;
 		else
-			zDirection = 0;
+			forwardDirection = 0;
 
 		if (currentKeyStates[SDL_SCANCODE_D])
-			xDirection = -1;
+			horizontalDirection = -1;
 		else if (currentKeyStates[SDL_SCANCODE_A])
-			xDirection = 1;
+			horizontalDirection = 1;
 		else 
-			xDirection = 0;
+			horizontalDirection = 0;
 
 		if (currentKeyStates[SDL_SCANCODE_E])
-			yDirection = 1;
+			verticalDirection = 1;
 		else if (currentKeyStates[SDL_SCANCODE_Q])
-			yDirection = -1;
+			verticalDirection = -1;
 		else
-			yDirection = 0;
+			verticalDirection = 0;
 
 		if (currentKeyStates[SDL_SCANCODE_LEFT])
 			yLookDir = -1;
@@ -88,21 +88,34 @@ public:
 			x = 0;
 			y = 0;
 			z = 0;
-			xDirection = 0;
-			yDirection = 0;
-			zDirection = 0;
+			horizontalDirection = 0;
+			verticalDirection = 0;
+			forwardDirection = 0;
 			xLook = 0;
 			yLook = 0;
 		}
 	}
 	void updateLocation()
 	{
-		x += speed * xDirection * deltaTime;
-		y += speed * yDirection * deltaTime;
-		z += speed * zDirection * deltaTime; // * sin(yLook + 1.57)
+		//x += speed * horizontalDirection * deltaTime;
+		y += speed * verticalDirection * deltaTime;
+		z += speed * forwardDirection * deltaTime * sin(yLook + 1.57);
+		x += speed * forwardDirection * deltaTime * yLook;
+		x += speed * horizontalDirection * deltaTime * sin(yLook + 1.57);
+		z += speed * horizontalDirection * deltaTime * -yLook;
 
 		xLook += sensitivity * xLookDir * deltaTime;
 		yLook += sensitivity * yLookDir * deltaTime;
+
+		if (xLook > M_PI / 2)
+			xLook = M_PI / 2;
+		else if (xLook < -M_PI / 2)
+			xLook = -M_PI / 2;
+
+		if (yLook > M_PI)
+			yLook = -M_PI;
+		else if (yLook < -M_PI)
+			yLook = M_PI;
 	}
 } cam;
 
