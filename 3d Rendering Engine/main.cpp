@@ -35,10 +35,12 @@ public:
 	float z = 0;
 	float xLook = 0;
 	float yLook = 0;
+	float zLook = 0;
 	float speed = 0.007;
 	float sensitivity = 0.001;
 	int xLookDir = 0;
 	int yLookDir = 0;
+	int zLookDir = 0;
 	int xDirection = 0;
 	int yDirection = 0;
 	int zDirection = 0;
@@ -47,30 +49,37 @@ public:
 		const Uint8* currentKeyStates = SDL_GetKeyboardState(NULL);
 
 		if (currentKeyStates[SDL_SCANCODE_W])
-			zDirection = 1;
-		else if (currentKeyStates[SDL_SCANCODE_S])
 			zDirection = -1;
+		else if (currentKeyStates[SDL_SCANCODE_S])
+			zDirection = 1;
 		else
 			zDirection = 0;
 
 		if (currentKeyStates[SDL_SCANCODE_D])
-			xDirection = 1;
-		else if (currentKeyStates[SDL_SCANCODE_A])
 			xDirection = -1;
+		else if (currentKeyStates[SDL_SCANCODE_A])
+			xDirection = 1;
 		else 
 			xDirection = 0;
 
 		if (currentKeyStates[SDL_SCANCODE_E])
-			yDirection = -1;
-		else if (currentKeyStates[SDL_SCANCODE_Q])
 			yDirection = 1;
+		else if (currentKeyStates[SDL_SCANCODE_Q])
+			yDirection = -1;
 		else
 			yDirection = 0;
 
 		if (currentKeyStates[SDL_SCANCODE_LEFT])
-			xLookDir = -1;
+			yLookDir = -1;
 		else if (currentKeyStates[SDL_SCANCODE_RIGHT])
+			yLookDir = 1;
+		else
+			yLookDir = 0;
+
+		if (currentKeyStates[SDL_SCANCODE_UP])
 			xLookDir = 1;
+		else if (currentKeyStates[SDL_SCANCODE_DOWN])
+			xLookDir = -1;
 		else
 			xLookDir = 0;
 
@@ -90,7 +99,7 @@ public:
 	{
 		x += speed * xDirection * deltaTime;
 		y += speed * yDirection * deltaTime;
-		z += speed * zDirection * deltaTime;
+		z += speed * zDirection * deltaTime; // * sin(yLook + 1.57)
 
 		xLook += sensitivity * xLookDir * deltaTime;
 		yLook += sensitivity * yLookDir * deltaTime;
@@ -102,19 +111,32 @@ struct
 public:
 	float get3dPoint(float x, float y, float z, char xOry)
 	{
-		//Relative to player coords
-		float xRel = x + cam.x;
-		float yRel = y + cam.y;
-		float zRel = z + cam.z;
-		
-		int focal = 500;
-		float scale_factor = focal / zRel;
+		//int focal = 500;
+		//float scale_factor = focal / zRel;
 
-		float xScreen = ((xRel * cos(cam.xLook)) - (zRel * sin(cam.xLook))) * (scale_factor) + SCREEN_WIDTH / 2;
-		float yScreen = yRel * scale_factor + SCREEN_HEIGHT / 2;
+		//float xScreen = ((xRel * cos(cam.xLook)) - (zRel * sin(cam.xLook))) * scale_factor + SCREEN_WIDTH / 2;
+		//float yScreen = ((yRel * cos(cam.yLook)) + (xRel * sin(cam.yLook))) * scale_factor + SCREEN_HEIGHT / 2;
 
 		//if (z < cam.z)
 			//return 0;
+
+
+
+		//Relative to player coords
+		float xRel = x - cam.x;
+		float yRel = y - cam.y;
+		float zRel = z - cam.z;
+
+		float dx = cos(cam.yLook) * (sin(cam.zLook) * yRel + cos(cam.zLook) * xRel) - sin(cam.yLook) * zRel;
+		float dy = sin(cam.xLook) * (cos(cam.yLook) * zRel + sin(cam.yLook) * (sin(cam.zLook) * yRel + cos(cam.zLook) * xRel)) + cos(cam.xLook) * (cos(cam.zLook) * yRel - sin(cam.zLook) * xRel);
+		float dz = cos(cam.xLook) * (cos(cam.yLook) * zRel + sin(cam.yLook) * (sin(cam.zLook) * yRel + cos(cam.zLook) * xRel)) - sin(cam.xLook) * (cos(cam.zLook) * yRel - sin(cam.zLook) * xRel);
+
+		float ex = SCREEN_WIDTH / 2;
+		float ey = SCREEN_HEIGHT / 2;
+		float ez = 500;
+
+		float xScreen = dx * (ez / dz) + ex;
+		float yScreen = dy * (ez / dz) + ey;
 
 		if (xOry == 'x')
 		{
@@ -269,7 +291,7 @@ int main(int argc, char* args[])
 
 			deltaTime = (double)((NOW - LAST) * 1000 / (double)SDL_GetPerformanceFrequency());
 
-			cout << deltaTime << endl;
+			cout << cam.xLook << ", " << cam.yLook << endl;
 
 			//Clear screen
 			SDL_SetRenderDrawColor(renderer, 230, 230, 230, 0);
@@ -277,15 +299,15 @@ int main(int argc, char* args[])
 
 			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 
-			Shape3d.draw3dRhombus(renderer, 1, 1, 1, 5, 1);
+			//Shape3d.draw3dRhombus(renderer, 1, 1, 1, 5, 1);
 
-			/*
+			
 			Shape3d.draw3dRect(renderer, 1, 1, 1, -1, -1, -1); // bottom right
 			Shape3d.draw3dRect(renderer, 6, 1, 1, 2, -1, -1); // bottom left
 			Shape3d.draw3dRect(renderer, 6, 5, 1, 2, 2, -1); // top left
 			Shape3d.draw3dRect(renderer, 1, 3, 1, 0, 2, 0); // top right
 			Shape3d.draw3dRect(renderer, -2, -1, 1, -2.5, -0.5, 0.5); // first
-			Shape3d.draw3dRect(renderer, -3, -1, 1, -3.1, -1.1, 0.9); // second*/
+			Shape3d.draw3dRect(renderer, -3, -1, 1, -3.1, -1.1, 0.9); // second
 			cam.updateLocation();
 
 			//Update screen
