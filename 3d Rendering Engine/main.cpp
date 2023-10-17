@@ -127,12 +127,11 @@ public:
 		//int focal = 500;
 		//float scale_factor = focal / zRel;
 
-		//float xScreen = ((xRel * cos(cam.xLook)) - (zRel * sin(cam.xLook))) * scale_factor + SCREEN_WIDTH / 2;
-		//float yScreen = ((yRel * cos(cam.yLook)) + (xRel * sin(cam.yLook))) * scale_factor + SCREEN_HEIGHT / 2;
+		//float xScreen = xRel * scale_factor + SCREEN_WIDTH / 2;
+		//float yScreen = yRel * scale_factor + SCREEN_HEIGHT / 2;
 
 		//if (z < cam.z)
 			//return 0;
-
 
 
 		//Relative to player coords
@@ -150,65 +149,76 @@ public:
 
 		float xScreen = dx * (ez / dz) + ex;
 		float yScreen = dy * (ez / dz) + ey;
-
-		if (xOry == 'x')
+		
+		if (dz < 0)
 		{
-			return xScreen;
-		}
-		else if (xOry == 'y')
-		{
-			return yScreen;
+			if (xOry == 'x')
+				return xScreen;
+			else if (xOry == 'y')
+				return yScreen;
 		}
 	}
 	
-	void draw3dLine(SDL_Renderer* renderer, float x1, float y1, float z1, float x2, float y2, float z2)
+	void draw3dLine(float x1, float y1, float z1, float x2, float y2, float z2)
 	{
 		float scr_x1 = get3dPoint(x1, y1, z1, 'x');
 		float scr_y1 = get3dPoint(x1, y1, z1, 'y');
 		float scr_x2 = get3dPoint(x2, y2, z2, 'x');
 		float scr_y2 = get3dPoint(x2, y2, z2, 'y');
 
-		//if()
-			SDL_RenderDrawLine(renderer, scr_x1, scr_y1, scr_x2, scr_y2);
+		SDL_RenderDrawLine(renderer, scr_x1, scr_y1, scr_x2, scr_y2);
 	};
 
-	void draw3dRhombus(SDL_Renderer* renderer, float x1, float y1, float z1, float l, float w)
+	void draw3dRhombus(float x1, float y1, float z1, float w, float h)
 	{
 		//top point
-		draw3dLine(renderer, x1, y1, z1, x1 + w, y1 - l / 2, z1);
-		draw3dLine(renderer, x1, y1, z1, x1 - w, y1 - l / 2, z1);
-		draw3dLine(renderer, x1, y1, z1, x1, y1 - l / 2, z1 + w);
-		draw3dLine(renderer, x1, y1, z1, x1, y1 - l / 2, z1 - w);
-		draw3dLine(renderer, x1, y1 - l, z1, x1 + w, y1 - l / 2, z1);
-		draw3dLine(renderer, x1, y1 - l, z1, x1 - w, y1 - l / 2, z1);
-		draw3dLine(renderer, x1, y1 - l, z1, x1, y1 - l / 2, z1 + w);
-		draw3dLine(renderer, x1, y1 - l, z1, x1, y1 - l / 2, z1 - w);
-		draw3dLine(renderer, x1 + w, y1 - l / 2, z1, x1, y1 - l / 2, z1 + w);
-		draw3dLine(renderer, x1 + w, y1 - l / 2, z1, x1, y1 - l / 2, z1 - w);
-		draw3dLine(renderer, x1 - w, y1 - l / 2, z1, x1, y1 - l / 2, z1 + w);
-		draw3dLine(renderer, x1 - w, y1 - l / 2, z1, x1, y1 - l / 2, z1 - w);
+		draw3dLine(x1, y1, z1, x1 + w, y1 - h / 2, z1);
+		draw3dLine(x1, y1, z1, x1 - w, y1 - h / 2, z1);
+		draw3dLine(x1, y1, z1, x1, y1 - h / 2, z1 + w);
+		draw3dLine(x1, y1, z1, x1, y1 - h / 2, z1 - w);
+		draw3dLine(x1, y1 - h, z1, x1 + w, y1 - h / 2, z1);
+		draw3dLine(x1, y1 - h, z1, x1 - w, y1 - h / 2, z1);
+		draw3dLine(x1, y1 - h, z1, x1, y1 - h / 2, z1 + w);
+		draw3dLine(x1, y1 - h, z1, x1, y1 - h / 2, z1 - w);
+		draw3dLine(x1 + w, y1 - h / 2, z1, x1, y1 - h / 2, z1 + w);
+		draw3dLine(x1 + w, y1 - h / 2, z1, x1, y1 - h / 2, z1 - w);
+		draw3dLine(x1 - w, y1 - h / 2, z1, x1, y1 - h / 2, z1 + w);
+		draw3dLine(x1 - w, y1 - h / 2, z1, x1, y1 - h / 2, z1 - w);
 	};
 
-	void draw3dRect(SDL_Renderer* renderer, float x1, float y1, float z1, float x2, float y2, float z2)
+	void draw3dRect(float x1, float y1, float z1, float x2, float y2, float z2)
 	{
 		//front
-		draw3dLine(renderer, x1, y1, z1, x1, y2, z1);
-		draw3dLine(renderer, x1, y2, z1, x2, y2, z1);
-		draw3dLine(renderer, x2, y1, z1, x2, y2, z1);
-		draw3dLine(renderer, x2, y1, z1, x1, y1, z1);
+		draw3dLine(x1, y1, z1, x1, y2, z1);
+		draw3dLine(x1, y2, z1, x2, y2, z1);
+		draw3dLine(x2, y1, z1, x2, y2, z1);
+		draw3dLine(x2, y1, z1, x1, y1, z1);
 
 		//back
-		draw3dLine(renderer, x1, y1, z2, x1, y2, z2);
-		draw3dLine(renderer, x1, y1, z2, x1, y2, z2);
-		draw3dLine(renderer, x1, y2, z2, x2, y2, z2);
-		draw3dLine(renderer, x2, y2, z2, x2, y1, z2);
-		draw3dLine(renderer, x2, y1, z2, x1, y1, z2);
+		draw3dLine(x1, y1, z2, x1, y2, z2);
+		draw3dLine(x1, y1, z2, x1, y2, z2);
+		draw3dLine(x1, y2, z2, x2, y2, z2);
+		draw3dLine(x2, y2, z2, x2, y1, z2);
+		draw3dLine(x2, y1, z2, x1, y1, z2);
 
 		//inner (these cause the weird glitches inside box)
-		draw3dLine(renderer, x1, y1, z1, x1, y1, z2);
-		draw3dLine(renderer, x2, y1, z1, x2, y1, z2);
-		draw3dLine(renderer, x1, y2, z1, x1, y2, z2);
-		draw3dLine(renderer, x2, y2, z1, x2, y2, z2);
+		draw3dLine(x1, y1, z1, x1, y1, z2);
+		draw3dLine(x2, y1, z1, x2, y1, z2);
+		draw3dLine(x1, y2, z1, x1, y2, z2);
+		draw3dLine(x2, y2, z1, x2, y2, z2);
+	}
+
+	void draw3dPillar(float x, float y, float z, float w, float l, float h)
+	{
+		draw3dRect(x - w, y, z - l, x + w, y + 0.5, z + l);
+		draw3dRect(x - w, y + h + 0.7, z - l, x + w, y + h + 1.2, z + l);
+		w /= 1.3;
+		l /= 1.3;
+		draw3dRect(x - w, y + 0.5, z - l, x + w, y + 1.2, z + l);
+		draw3dRect(x - w, y + h, z - l, x + w, y + h + 0.7, z + l);
+		w /= 1.2;
+		l /= 1.2;
+		draw3dRect(x - w, y + 1.2, z - l, x + w, y + h, z + l);
 	}
 private:
 
@@ -305,19 +315,28 @@ int main(int argc, char* args[])
 
 			deltaTime = (double)((NOW - LAST) * 1000 / (double)SDL_GetPerformanceFrequency());
 
-			cout << cam.xLook << endl;
-
 			//Clear screen
 			SDL_SetRenderDrawColor(renderer, 230, 230, 230, 0);
 			SDL_RenderClear(renderer);
 
 			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 
-			//Shape3d.draw3dRhombus(renderer, 1, 1, 1, 5, 1);
+			Shape3d.draw3dPillar(-5, -3, 0, 1.5, 1.5, 10);
+			Shape3d.draw3dPillar(5, -3, 0, 1.5, 1.5, 10);
+			Shape3d.draw3dPillar(-5, -3, 10, 1.5, 1.5, 10);
+			Shape3d.draw3dPillar(5, -3, 10, 1.5, 1.5, 10);
+			Shape3d.draw3dPillar(-5, -3, -10, 1.5, 1.5, 10);
+			Shape3d.draw3dPillar(5, -3, -10, 1.5, 1.5, 10);
 
-			
-			Shape3d.draw3dRect(renderer, 1, 1, -10, -1, -1, -12);
-			//Shape3d.draw3dLine(renderer, -5, 1, 1, -5, -1, 1);
+			Shape3d.draw3dRhombus(0, 6, -20, 2, 8);
+
+			Shape3d.draw3dRect(5, 10, -20, 3, 8, -22);
+			Shape3d.draw3dRect(-5, 10, -20, -3, 8, -22);
+			Shape3d.draw3dRect(5, -5, -20, 3, -3, -22);
+			Shape3d.draw3dRect(-5, -5, -20, -3, -3, -22);
+			Shape3d.draw3dRect(8, 2, -20, 6, 4, -22);
+			Shape3d.draw3dRect(-8, 2, -20, -6, 4, -22);
+
 			cam.updateLocation();
 
 			//Update screen
