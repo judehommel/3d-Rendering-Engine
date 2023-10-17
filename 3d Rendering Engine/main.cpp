@@ -100,9 +100,9 @@ public:
 		//x += speed * horizontalDirection * deltaTime;
 		y += speed * verticalDirection * deltaTime;
 		z += speed * forwardDirection * deltaTime * sin(yLook + 1.57);
-		x += speed * forwardDirection * deltaTime * yLook;
+		x += speed * forwardDirection * deltaTime * sin(yLook);
 		x += speed * horizontalDirection * deltaTime * sin(yLook + 1.57);
-		z += speed * horizontalDirection * deltaTime * -yLook;
+		z += speed * horizontalDirection * deltaTime * sin(-yLook);
 
 		xLook += sensitivity * xLookDir * deltaTime;
 		yLook += sensitivity * yLookDir * deltaTime;
@@ -168,7 +168,8 @@ public:
 		float scr_x2 = get3dPoint(x2, y2, z2, 'x');
 		float scr_y2 = get3dPoint(x2, y2, z2, 'y');
 
-		SDL_RenderDrawLine(renderer, scr_x1, scr_y1, scr_x2, scr_y2);
+		//if()
+			SDL_RenderDrawLine(renderer, scr_x1, scr_y1, scr_x2, scr_y2);
 	};
 
 	void draw3dRhombus(SDL_Renderer* renderer, float x1, float y1, float z1, float l, float w)
@@ -304,7 +305,7 @@ int main(int argc, char* args[])
 
 			deltaTime = (double)((NOW - LAST) * 1000 / (double)SDL_GetPerformanceFrequency());
 
-			cout << cam.xLook << ", " << cam.yLook << endl;
+			cout << cam.xLook << endl;
 
 			//Clear screen
 			SDL_SetRenderDrawColor(renderer, 230, 230, 230, 0);
@@ -315,12 +316,8 @@ int main(int argc, char* args[])
 			//Shape3d.draw3dRhombus(renderer, 1, 1, 1, 5, 1);
 
 			
-			Shape3d.draw3dRect(renderer, 1, 1, 1, -1, -1, -1); // bottom right
-			Shape3d.draw3dRect(renderer, 6, 1, 1, 2, -1, -1); // bottom left
-			Shape3d.draw3dRect(renderer, 6, 5, 1, 2, 2, -1); // top left
-			Shape3d.draw3dRect(renderer, 1, 3, 1, 0, 2, 0); // top right
-			Shape3d.draw3dRect(renderer, -2, -1, 1, -2.5, -0.5, 0.5); // first
-			Shape3d.draw3dRect(renderer, -3, -1, 1, -3.1, -1.1, 0.9); // second
+			Shape3d.draw3dRect(renderer, 1, 1, -10, -1, -1, -12);
+			//Shape3d.draw3dLine(renderer, -5, 1, 1, -5, -1, 1);
 			cam.updateLocation();
 
 			//Update screen
